@@ -9,15 +9,15 @@
 class Payment_Adapter_Coinbase
 {
     private $config = array();
-    
+
     public function __construct($config)
     {
         $this->config = $config;
-        
+
         if(!function_exists('curl_exec')) {
             throw new Exception('PHP Curl extension must be enabled in order to use Coinbase gateway');
         }
-        
+
         if(!$this->config['Coinbase_api']) {
             throw new Exception('Payment gateway "Coinbase" is not configured properly. Please update configuration parameter "Coinbase API Key" at "Configuration -> Payments".');
         }
@@ -50,10 +50,10 @@ class Payment_Adapter_Coinbase
     {
         $invoice = $api_admin->invoice_get(array('id' => $invoice_id));
         $buyer = $invoice['buyer'];
-        
+
         $p = array(
-            ':id'=>sprintf('%05s', $invoice['nr']), 
-            ':serie'=>$invoice['serie'], 
+            ':id'=>sprintf('%05s', $invoice['nr']),
+            ':serie'=>$invoice['serie'],
             ':title'=>$invoice['lines'][0]['title']
         );
         $title = __('Payment for invoice :serie:id [:title]', $p);
@@ -65,14 +65,14 @@ class Payment_Adapter_Coinbase
 		{
 			$ch = curl_init();
 			$coinbase = Coinbase::withApiKey($this->config['Coinbase_api'], $this->config['Coinbase_secret']);
-			
+
 			$response = $coinbase->createButton($title, $invoice['total'], $invoice['currency'], $invoice_id, array(
 				"description" => $title,
 				"callback_url"=> ($this->config['return_url']),
 				"cancel_url"=> ($this->config['cancel_url']),
 			));
-			
-			return "<a href='https://coinbase.com/checkouts/".$response->button->code ."'>Pay</a>";
+
+      return "<a href='https://coinbase.com/checkouts/".$response->button->code ."'><img src='https://billing.sacred.website/bb-uploads/icons/bitcoin-logo-100.png' style='max-height: 50px'><b> Click Here To Pay With BitCoin</b></a>";
 		}
 
         return $form;
@@ -84,20 +84,20 @@ class Payment_Adapter_Coinbase
 
 		if ($Coinbase['status'] == "completed")
 		{
-			
+
 			$invoice_id = intval($Coinbase["custom"]);
 			$tx = $api_admin->invoice_transaction_get(array('id'=> $id));
-			
+
 			if (!$tx['invoice_id'])
 			{
 				$api_admin->invoice_transaction_update(array('id' => $id, 'invoice_id' => $invoice_id));
 			}
-			
+
 			if (!$tx['amount'])
 			{
 				$api_admin->invoice_transaction_update(array('id' => $id, 'amount' => $Coinbase['total_native']["cents"]/100.0));
 			}
-			
+
 			$invoice = $api_admin->invoice_get(array('id' => $invoice_id));
 			$client_id = $invoice['client']['id'];
 			$bd = array(
@@ -109,9 +109,9 @@ class Payment_Adapter_Coinbase
 			);
 			$api_admin->client_balance_add_funds($bd);
 			$api_admin->invoice_batch_pay_with_credits(array('client_id' => $client_id));
-	 
+
 			$d = array(
-				'id'        => $id, 
+				'id'        => $id,
 				'error'     => '',
 				'error_code'=> '',
 				'status'    => 'processed',
