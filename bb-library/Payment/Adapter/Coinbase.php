@@ -72,7 +72,7 @@ class Payment_Adapter_Coinbase
 				"cancel_url"=> ($this->config['cancel_url']),
 			));
 
-      return "<a href='https://coinbase.com/checkouts/".$response->button->code ."'><img src='https://billing.sacred.website/bb-uploads/icons/bitcoin-logo-100.png' style='max-height: 50px'><b> Click Here To Pay With BitCoin</b></a>";
+      return "<a href='https://coinbase.com/checkouts/".$response->button->code ."'><img src='https://billing.sacred.website/bb-uploads/icons/bitcoin-logo-50.png' style='max-height: 50px'><b> Click Here To Pay With BitCoin</b></a>";
 		}
 
         return $form;
